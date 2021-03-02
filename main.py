@@ -7,7 +7,6 @@ LOG_LEVEL=logging.INFO
 
 logging.basicConfig(filename=LOG_FILENAME,level=LOG_LEVEL)
 
-
 basepath = Path()
 basedir = str(basepath.cwd())
 envars = basepath.cwd() / 'SECRETS.env'
@@ -73,8 +72,8 @@ def getCotizacion(coin,fiat,volumen):
       logging.info('spread= ' + str(float(_bid['price']) - float(_ask['price'])))
 
       bot_message = f'Moneda: {coin} para valores de {volumen}\nComprar en **' + _ask['exchange'] + '** a: ' + str(_ask['price']) + '\nVender en **' + _bid['exchange'] + '** a: ' + str(_bid['price']) + '\n' + str(percentage) +'%'
-      
       send_text = 'https://api.telegram.org/bot' + _bot_token + '/sendMessage?chat_id=' + _bot_chatID + '&parse_mode=Markdown&text=' + bot_message
+      
       try:
         response = requests.get(send_text)
       except Exception as e:
