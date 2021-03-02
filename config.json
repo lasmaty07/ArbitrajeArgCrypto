@@ -1,0 +1,29 @@
+{
+  "percentage": "0.1",
+  "coins": [
+    {
+      "name": "dai",
+      "vol": "500"
+    },
+    {
+      "name": "eth",
+      "vol": "0.5"
+    },
+    {
+      "name": "btc",
+      "vol": "0.02"
+    }
+  ],
+  "exchanges": [
+    "argenbtc",
+    "bitso",
+    "buda",
+    "buenbit",
+    "cryptomkt",
+    "decrypto",
+    "ripio",
+    "ripioexchange",
+    "satoshitango"
+  ],
+  "url": "https://criptoya.com"
+}
