@@ -18,7 +18,7 @@ except Exception as e:
 
 #load secrets
 _bot_token = os.getenv("BOT_TOKEN")
-_bot_chatID = os.getenv("BOT_CHAT_ID")
+_bot_chatIDS = os.getenv("BOT_CHAT_IDS").split(',')
 
 try:
   with open('config.json', 'r') as f:
@@ -71,13 +71,14 @@ def getCotizacion(coin,fiat,volumen):
       logging.info('Vender en ' + _bid['exchange'] + ' a: ' + str(_bid['price']))
       logging.info('spread= ' + str(float(_bid['price']) - float(_ask['price'])))
 
-      bot_message = f'Moneda: {coin} para valores de {volumen}\nComprar en **' + _ask['exchange'] + '** a: ' + str(_ask['price']) + '\nVender en **' + _bid['exchange'] + '** a: ' + str(_bid['price']) + '\n' + str(percentage) +'%'
-      send_text = 'https://api.telegram.org/bot' + _bot_token + '/sendMessage?chat_id=' + _bot_chatID + '&parse_mode=Markdown&text=' + bot_message
+      bot_message = f'Moneda: {coin} para volumen de {volumen}\nComprar en **' + _ask['exchange'] + '** a: ' + str(_ask['price']) + '\nVender en **' + _bid['exchange'] + '** a: ' + str(_bid['price']) + '\n' + str(percentage) +'%'
       
-      try:
-        response = requests.get(send_text)
-      except Exception as e:
-        logging.error(e)
+      for chat in _bot_chatIDS:
+        send_text = 'https://api.telegram.org/bot' + _bot_token + '/sendMessage?chat_id=' + chat + '&parse_mode=Markdown&text=' + bot_message      
+        try:
+          response = requests.get(send_text)
+        except Exception as e:
+          logging.error(e)
 
 def printInfo():
   #TODO FIX this
