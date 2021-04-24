@@ -70,8 +70,9 @@ def getCotizacion(coin,fiat,volumen):
       logging.info('Comprar en ' + _ask['exchange'] + ' a: ' + str(_ask['price']))
       logging.info('Vender en ' + _bid['exchange'] + ' a: ' + str(_bid['price']))
       logging.info('spread= ' + str(float(_bid['price']) - float(_ask['price'])))
-
-      bot_message = f'Moneda: {coin} para volumen de {volumen}\nComprar en **' + _ask['exchange'] + '** a: ' + str(_ask['price']) + '\nVender en **' + _bid['exchange'] + '** a: ' + str(_bid['price']) + '\n' + str(percentage) +'%'
+      
+      sPercentage = "%.2f" % round(percentage, 2)
+      bot_message = f'Moneda: {bold(coin)} para volumen de {volumen}\nComprar en ' + bold(_ask['exchange']) + ' a'+ italic('_(ARS)_') +': ' + str(_ask['price']) + '\nVender en ' + bold(_bid['exchange']) + ' a'+ italic('_(ARS)_') +': ' + str(_bid['price']) + '\n Spread: ' + sPercentage +'%'
       
       for chat in _bot_chatIDS:
         send_text = 'https://api.telegram.org/bot' + _bot_token + '/sendMessage?chat_id=' + chat + '&parse_mode=Markdown&text=' + bot_message      
@@ -98,6 +99,11 @@ def main():
 
   sys.exit(0)
 
+def bold(str):
+  return '*'+str+'*'
+
+def italic(str):
+  return '_'+str+'_'
 
 if __name__ == '__main__':
   main()
