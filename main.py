@@ -2,16 +2,15 @@ import requests,os,json,logging,sys
 from pathlib import Path
 from dotenv import load_dotenv
 
-LOG_FILENAME = '/home/pi/ArbitrajeArgCrypto/crypto.log'
+basepath = Path()
+
+LOG_FILENAME = basepath.cwd() / 'crypto.log'
 LOG_LEVEL=logging.INFO
 
 logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',filename=LOG_FILENAME,level=LOG_LEVEL,datefmt='%Y-%m-%d %H:%M:%S')
 
-basepath = Path()
-basedir = str(basepath.cwd())
-envars = basepath.cwd() / '/home/pi/ArbitrajeArgCrypto/SECRETS.env'
-
 try:
+  envars = basepath.cwd() / 'SECRETS.env'
   load_dotenv(envars)
   logging.info("ENV loaded")
 except Exception as e:
@@ -22,7 +21,8 @@ _bot_token = os.getenv("BOT_TOKEN")
 _bot_chatIDS = os.getenv("BOT_CHAT_IDS").split(',')
 
 try:
-  with open('/home/pi/ArbitrajeArgCrypto/config.json', 'r') as f:
+  configFile = basepath.cwd() / 'config.json'
+  with open(configFile, 'r') as f:
     config = json.load(f)
     logging.info("Config loaded")
 except IOError as e:
@@ -36,13 +36,14 @@ _exchangesEnabled = config["exchanges"]
 
 
 def getCotizacion(coin,fiat,volumen):
-  
+  logging.info(f'Coin: %s Fiat: %s Vol: %s' % (coin,fiat,volumen))
   try:
     response = requests.get(_url + '/api/' + coin + '/'+ fiat+ '/' + str(volumen))
+    logging.info(response)
   except Exception as e:
-    logging.error(e)  
+    logging.error(e)
 
-  if response:
+  if response.status_code == 200:
     exchanges = json.loads(response.text)
 
     # init vars
@@ -79,6 +80,7 @@ def getCotizacion(coin,fiat,volumen):
         send_text = 'https://api.telegram.org/bot' + _bot_token + '/sendMessage?chat_id=' + chat + '&parse_mode=Markdown&text=' + bot_message      
         try:
           response = requests.get(send_text)
+          logging.info(response)
         except Exception as e:
           logging.error(e)
 
@@ -95,8 +97,9 @@ def printInfo():
 
 def main():
   #printInfo()
-  for coin in _coins:
-    getCotizacion(coin['name'],'ars',coin['vol'])
+  #for coin in _coins:
+    #getCotizacion(coin['name'],'ars',coin['vol'])
+  getNewUsers()
 
   sys.exit(0)
 
@@ -105,6 +108,21 @@ def bold(str):
 
 def italic(str):
   return '_'+str+'_'
+
+def getNewUsers():
+  try:
+    response = requests.get('https://api.telegram.org/bot' + _bot_token + '/getUpdates')
+  except Exception as e:
+    logging.error(e)
+
+  if response.status_code == 200:
+    updates = json.loads(response.text)
+    if updates['ok'] == 'true':
+      print(updates['result'][0]['message']['from']['id'])
+      print(updates['result'][0]['update_id'])
+
+
+
 
 if __name__ == '__main__':
   main()
