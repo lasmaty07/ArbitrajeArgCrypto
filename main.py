@@ -84,19 +84,7 @@ def getCotizacion(coin,fiat,volumen):
         except Exception as e:
           logging.error(e)
 
-def printInfo():
-  #TODO FIX this
-  print(_coins)
-  coins = ''
-  for coin in _coins:
-    coins += ',' + coin
-
-  print(f'Configured Coins: {coins}' )
-  exchanges = ','.join(_exchangesEnabled)
-  print(f'Configured Exchanges: {exchanges}')
-
 def main():
-  #printInfo()
   #for coin in _coins:
     #getCotizacion(coin['name'],'ars',coin['vol'])
   getNewUsers()
