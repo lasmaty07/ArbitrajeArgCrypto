@@ -12,14 +12,6 @@
     {
       "name": "btc",
       "vol": "0.02"
-    },
-    {
-	"name":"ltc",
-	"vol":"1"
-    },
-    {
-        "name":"xrp",
-        "vol":"150"
     }
   ],
   "exchanges": [
