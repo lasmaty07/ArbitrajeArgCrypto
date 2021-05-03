@@ -2,17 +2,18 @@ import requests,os,json,logging,sys
 from pathlib import Path
 from dotenv import load_dotenv
 
-LOG_FILENAME = 'Crypto.log'
+LOG_FILENAME = '/home/pi/ArbitrajeArgCrypto/crypto.log'
 LOG_LEVEL=logging.INFO
 
-logging.basicConfig(filename=LOG_FILENAME,level=LOG_LEVEL)
+logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',filename=LOG_FILENAME,level=LOG_LEVEL,datefmt='%Y-%m-%d %H:%M:%S')
 
 basepath = Path()
 basedir = str(basepath.cwd())
-envars = basepath.cwd() / 'SECRETS.env'
+envars = basepath.cwd() / '/home/pi/ArbitrajeArgCrypto/SECRETS.env'
 
 try:
   load_dotenv(envars)
+  logging.info("ENV loaded")
 except Exception as e:
   logging.error(e)
 
@@ -21,7 +22,7 @@ _bot_token = os.getenv("BOT_TOKEN")
 _bot_chatIDS = os.getenv("BOT_CHAT_IDS").split(',')
 
 try:
-  with open('config.json', 'r') as f:
+  with open('/home/pi/ArbitrajeArgCrypto/config.json', 'r') as f:
     config = json.load(f)
     logging.info("Config loaded")
 except IOError as e:
