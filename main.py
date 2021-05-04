@@ -30,9 +30,11 @@ except IOError as e:
 
 #load config into vars
 _url = config["url"]
-_coins = config["coins"]
 _percentageConfig = float(config["percentage"])
 _exchangesEnabled = config["exchanges"]
+
+_telegramAPI = 'https://api.telegram.org'
+_last_update_id = 0
 
 
 def getCotizacion(coin,fiat,volumen):
@@ -76,8 +78,8 @@ def getCotizacion(coin,fiat,volumen):
       sPercentage = "%.2f" % round(percentage, 2)
       bot_message = f'Moneda: {bold(coin)} para volumen de {volumen}\nComprar en ' + bold(_ask['exchange']) + ' a'+ italic('_(ARS)_') +': ' + str(_ask['price']) + '\nVender en ' + bold(_bid['exchange']) + ' a'+ italic('_(ARS)_') +': ' + str(_bid['price']) + '\n Spread: ' + sPercentage +'%'
       
-      for chat in _bot_chatIDS:
-        send_text = 'https://api.telegram.org/bot' + _bot_token + '/sendMessage?chat_id=' + chat + '&parse_mode=Markdown&text=' + bot_message      
+      for chat_id in _bot_chatIDS:
+        send_text = _telegramAPI + '/bot' + _bot_token + '/sendMessage?chat_id=' + chat_id + '&parse_mode=Markdown&text=' + bot_message      
         try:
           response = requests.get(send_text)
           logging.info(response)
@@ -99,15 +101,30 @@ def italic(str):
 
 def getNewUsers():
   try:
-    response = requests.get('https://api.telegram.org/bot' + _bot_token + '/getUpdates')
+    response = requests.get(_telegramAPI +'/bot' + _bot_token + '/getUpdates')
+    logging.info(response)
   except Exception as e:
     logging.error(e)
 
   if response.status_code == 200:
     updates = json.loads(response.text)
-    if updates['ok'] == 'true':
-      print(updates['result'][0]['message']['from']['id'])
-      print(updates['result'][0]['update_id'])
+    if updates['ok']:
+      for update in updates['result']:
+        chat_id = update['message']['from']['id']
+        first_name = update['message']['from']['first_name']
+        last_name = update['message']['from']['last_name']
+        _last_update_id = update['update_id']
+
+        bot_message = f'Hi {first_name} {last_name}, welcome.'
+
+        if update['message']['text'] == '/start':
+          send_text = _telegramAPI + '/bot' + _bot_token + '/sendMessage?chat_id=' + str(chat_id) + '&parse_mode=Markdown&text=' + bot_message      
+          try:
+            response = requests.get(send_text)
+            logging.info(response)
+          except Exception as e:
+            logging.error(e)
+
 
 
 
