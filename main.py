@@ -1,6 +1,7 @@
 import requests,os,json,logging,sys
 from pathlib import Path
 from dotenv import load_dotenv
+import sqlite3
 
 basepath = Path()
 
@@ -34,8 +35,23 @@ _percentageConfig = float(config["percentage"])
 _exchangesEnabled = config["exchanges"]
 
 _telegramAPI = 'https://api.telegram.org'
-_last_update_id = 0
 
+
+try:
+  conn = sqlite3.connect('telegram.db')
+  cur = conn.cursor()
+  #cur.execute("create table user(user_id)")
+  #cur.execute("create table parameters (name, value)")
+  #cur.execute("insert into parameters values (?,?)", ("last_update_id",1))
+  #conn.commit()
+except IOError as e:
+  logging.error(e)
+
+
+cur.execute("select * from parameters where name=:name ", {"name": "last_update_id"})
+res = cur.fetchone()
+_last_update_id = res[1]+1
+#con.close()
 
 def getCotizacion(coin,fiat,volumen):
   logging.info(f'Coin: %s Fiat: %s Vol: %s' % (coin,fiat,volumen))
@@ -100,8 +116,9 @@ def italic(str):
   return '_'+str+'_'
 
 def getNewUsers():
+  global _last_update_id
   try:
-    response = requests.get(_telegramAPI +'/bot' + _bot_token + '/getUpdates')
+    response = requests.get(_telegramAPI +'/bot' + _bot_token + '/getUpdates?offset='+ str(_last_update_id))
     logging.info(response)
   except Exception as e:
     logging.error(e)
@@ -114,6 +131,7 @@ def getNewUsers():
         first_name = update['message']['from']['first_name']
         last_name = update['message']['from']['last_name']
         _last_update_id = update['update_id']
+        update_param(conn,'last_update_id',_last_update_id)
 
         bot_message = f'Hi {first_name} {last_name}, welcome.'
 
@@ -125,7 +143,13 @@ def getNewUsers():
           except Exception as e:
             logging.error(e)
 
-
+def update_param(conn, name,value):
+    sql = ''' UPDATE parameters
+              SET value = :value
+              WHERE name = :name '''
+    cur = conn.cursor()
+    cur.execute(sql,  {"name": name, "value":value})
+    conn.commit()
 
 
 
