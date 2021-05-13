@@ -128,15 +128,15 @@ def getNewUsers():
     updates = json.loads(response.text)
     if updates['ok']:
       for update in updates['result']:
+        chat_id = update['message']['from']['id']
+        first_name = update['message']['from']['first_name']
+        last_name = update['message']['from']['last_name']
+        _last_update_id = update['update_id']
         update_param(conn,'last_update_id',_last_update_id)
-
-        
+        logging.info(str(chat_id) + first_name + last_name + str(_last_update_id))
 
         if update['message']['text'] == '/start':
-          chat_id = update['message']['from']['id']
-          first_name = update['message']['from']['first_name']
-          last_name = update['message']['from']['last_name']
-          _last_update_id = update['update_id']
+          
           bot_message = f'Hi {first_name} {last_name}, welcome. this is having around 30 minutes delay, please be patient'
           send_text = _telegramAPI + '/bot' + _bot_token + '/sendMessage?chat_id=' + str(chat_id) + '&parse_mode=Markdown&text=' + bot_message      
           try:
