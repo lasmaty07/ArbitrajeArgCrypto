@@ -52,7 +52,13 @@ except IOError as e:
 cur.execute("select * from parameters where name=:name ", {"name": "last_update_id"})
 res = cur.fetchone()
 _last_update_id = res[1]+1
-#con.close()
+
+def main():
+  for coin in _coins:
+    getCotizacion(coin['name'],'ars',coin['vol'])
+  getNewUsers()
+  conn.close()
+  sys.exit(0)
 
 def getCotizacion(coin,fiat,volumen):
   logging.info(f'Coin: %s Fiat: %s Vol: %s' % (coin,fiat,volumen))
@@ -95,20 +101,17 @@ def getCotizacion(coin,fiat,volumen):
       sPercentage = "%.2f" % round(percentage, 2)
       bot_message = f'Moneda: {bold(coin)} para volumen de {volumen}\nComprar en ' + bold(_ask['exchange']) + ' a'+ italic('_(ARS)_') +': ' + str(_ask['price']) + '\nVender en ' + bold(_bid['exchange']) + ' a'+ italic('_(ARS)_') +': ' + str(_bid['price']) + '\n Spread: ' + sPercentage +'%'
       
-      for chat_id in _bot_chatIDS:
-        send_text = _telegramAPI + '/bot' + _bot_token + '/sendMessage?chat_id=' + chat_id + '&parse_mode=Markdown&text=' + bot_message      
-        try:
-          response = requests.get(send_text)
-          logging.info(response)
-        except Exception as e:
-          logging.error(e)
+      cur.execute("select * from user ")
+      users_ids = cur.fetchone()
+      if users_ids:
+        for chat_id in users_ids:
+          send_text = _telegramAPI + '/bot' + _bot_token + '/sendMessage?chat_id=' + chat_id + '&parse_mode=Markdown&text=' + bot_message      
+          try:
+            response = requests.get(send_text)
+            logging.info(response)
+          except Exception as e:
+            logging.error(e)
 
-def main():
-  for coin in _coins:
-    getCotizacion(coin['name'],'ars',coin['vol'])
-  getNewUsers()
-
-  sys.exit(0)
 
 def bold(str):
   return '*'+str+'*'
@@ -137,7 +140,10 @@ def getNewUsers():
 
         if update['message']['text'] == '/start':
           
-          bot_message = f'Hi {first_name} {last_name}, welcome. this is having around 30 minutes delay, please be patient'
+          bot_message = f'Hi {first_name} {last_name}, welcome. the script runs every 30 minutes, please be patient.'
+          existing = insert_user(conn,str(chat_id))
+          if existing:
+            bot_message = bot_message + f' You already were in the database of this bot.'
           send_text = _telegramAPI + '/bot' + _bot_token + '/sendMessage?chat_id=' + str(chat_id) + '&parse_mode=Markdown&text=' + bot_message      
           try:
             response = requests.get(send_text)
@@ -174,6 +180,19 @@ def update_param(conn, name,value):
     cur = conn.cursor()
     cur.execute(sql,  {"name": name, "value":value})
     conn.commit()
+
+def insert_user(conn, chat_id):
+    cur = conn.cursor()
+    cur.execute("select * from user where user_id=:chat_id ", {"chat_id": chat_id})
+    users_ids = cur.fetchone()
+    if not(users_ids):
+      sql = ''' INSERT INTO user
+                (user_id) 
+                VALUES (:chat_id)'''      
+      cur.execute(sql,  {"chat_id": chat_id})
+      conn.commit()
+      return False
+    return True
 
 
 if __name__ == '__main__':
