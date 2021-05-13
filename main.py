@@ -5,13 +5,13 @@ import sqlite3
 
 basepath = Path()
 
-LOG_FILENAME = basepath.cwd() / 'crypto.log'
+LOG_FILENAME = '/home/pi/ArbitrajeArgCrypto/crypto.log'
 LOG_LEVEL=logging.INFO
 
 logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',filename=LOG_FILENAME,level=LOG_LEVEL,datefmt='%Y-%m-%d %H:%M:%S')
 
 try:
-  envars = basepath.cwd() / 'SECRETS.env'
+  envars = '/home/pi/ArbitrajeArgCrypto/SECRETS.env'
   load_dotenv(envars)
   logging.info("ENV loaded")
 except Exception as e:
@@ -22,7 +22,7 @@ _bot_token = os.getenv("BOT_TOKEN")
 _bot_chatIDS = os.getenv("BOT_CHAT_IDS").split(',')
 
 try:
-  configFile = basepath.cwd() / 'config.json'
+  configFile = '/home/pi/ArbitrajeArgCrypto/config.json'
   with open(configFile, 'r') as f:
     config = json.load(f)
     logging.info("Config loaded")
@@ -39,7 +39,7 @@ _telegramAPI = 'https://api.telegram.org'
 
 
 try:
-  conn = sqlite3.connect('telegram.db')
+  conn = sqlite3.connect('/home/pi/ArbitrajeArgCrypto/telegram.db')
   cur = conn.cursor()
   #cur.execute("create table user(user_id)")
   #cur.execute("create table parameters (name, value)")
@@ -140,7 +140,7 @@ def getNewUsers():
 
         if update['message']['text'] == '/start':
           
-          bot_message = f'Hi {first_name} {last_name}, welcome. the script runs every 30 minutes, please be patient.'
+          bot_message = f'Hi {first_name} {last_name}, welcome. the script runs every 5 minutes, please be patient.'
           existing = insert_user(conn,str(chat_id))
           if existing:
             bot_message = bot_message + f' You already were in the database of this bot.'
