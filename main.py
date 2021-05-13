@@ -104,8 +104,8 @@ def getCotizacion(coin,fiat,volumen):
           logging.error(e)
 
 def main():
-  #for coin in _coins:
-    #getCotizacion(coin['name'],'ars',coin['vol'])
+  for coin in _coins:
+    getCotizacion(coin['name'],'ars',coin['vol'])
   getNewUsers()
 
   sys.exit(0)
