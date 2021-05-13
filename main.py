@@ -33,6 +33,7 @@ except IOError as e:
 _url = config["url"]
 _percentageConfig = float(config["percentage"])
 _exchangesEnabled = config["exchanges"]
+_coins = config["coins"]
 
 _telegramAPI = 'https://api.telegram.org'
 
@@ -133,9 +134,32 @@ def getNewUsers():
         _last_update_id = update['update_id']
         update_param(conn,'last_update_id',_last_update_id)
 
-        bot_message = f'Hi {first_name} {last_name}, welcome.'
+        
 
         if update['message']['text'] == '/start':
+          bot_message = f'Hi {first_name} {last_name}, welcome. this is having around 30 minutes delay, please be patient'
+          send_text = _telegramAPI + '/bot' + _bot_token + '/sendMessage?chat_id=' + str(chat_id) + '&parse_mode=Markdown&text=' + bot_message      
+          try:
+            response = requests.get(send_text)
+            logging.info(response)
+          except Exception as e:
+            logging.error(e)
+
+        if update['message']['text'] == '/getexchanges':
+          bot_message = 'Exchanges: '
+          for exchange in _exchangesEnabled:
+            bot_message = f'{bot_message} {exchange}'
+          send_text = _telegramAPI + '/bot' + _bot_token + '/sendMessage?chat_id=' + str(chat_id) + '&parse_mode=Markdown&text=' + bot_message      
+          try:
+            response = requests.get(send_text)
+            logging.info(response)
+          except Exception as e:
+            logging.error(e)
+
+        if update['message']['text'] == '/getcoins':
+          bot_message = 'Configured Coins:'
+          for coin in _coins:
+            bot_message = f'{bot_message}, {coin}'
           send_text = _telegramAPI + '/bot' + _bot_token + '/sendMessage?chat_id=' + str(chat_id) + '&parse_mode=Markdown&text=' + bot_message      
           try:
             response = requests.get(send_text)
@@ -150,7 +174,6 @@ def update_param(conn, name,value):
     cur = conn.cursor()
     cur.execute(sql,  {"name": name, "value":value})
     conn.commit()
-
 
 
 if __name__ == '__main__':
